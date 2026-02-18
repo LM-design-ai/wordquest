@@ -125,6 +125,23 @@
   .mode-btn.flash { box-shadow: 0 4px 20px rgba(168,85,247,.25); border: 2.5px solid #a855f7; }
   .mode-btn.quiz { box-shadow: 0 4px 20px rgba(245,158,11,.25); border: 2.5px solid #f59e0b; }
   .mode-btn.match { box-shadow: 0 4px 20px rgba(20,184,166,.25); border: 2.5px solid #14b8a6; }
+  .mode-btn.synonym { box-shadow: 0 4px 20px rgba(139,92,246,.25); border: 2.5px solid #8b5cf6; }
+  .mode-btn.antonym { box-shadow: 0 4px 20px rgba(239,68,68,.25); border: 2.5px solid #ef4444; }
+  .mode-btn.sentence { box-shadow: 0 4px 20px rgba(16,185,129,.25); border: 2.5px solid #10b981; }
+
+  /* Attempts indicator */
+  .attempts-wrap {
+    display: flex; gap: 8px; align-items: center; justify-content: center;
+    margin-top: 4px;
+  }
+  .attempt-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    transition: background .2s;
+  }
+  .attempt-dot.used { background: #fca5a5; }
+  .attempt-dot.available { background: #86efac; }
 
   /* ===== ACTIVITY SCREENS ===== */
   .activity-screen {
@@ -543,12 +560,27 @@
       <button class="mode-btn quiz" onclick="startActivity('quiz')">
         <span class="mode-icon">❓</span>
         <span class="mode-name">Quiz</span>
-        <span class="mode-desc">Pick the right answer</span>
+        <span class="mode-desc">Pick the right meaning</span>
       </button>
       <button class="mode-btn match" onclick="startActivity('match')">
         <span class="mode-icon">🔗</span>
         <span class="mode-name">Match</span>
         <span class="mode-desc">Connect word to meaning</span>
+      </button>
+      <button class="mode-btn synonym" onclick="startActivity('synonym')">
+        <span class="mode-icon">💜</span>
+        <span class="mode-name">Synonyms</span>
+        <span class="mode-desc">Find a word that means the same</span>
+      </button>
+      <button class="mode-btn antonym" onclick="startActivity('antonym')">
+        <span class="mode-icon">❤️</span>
+        <span class="mode-name">Antonyms</span>
+        <span class="mode-desc">Find the opposite word</span>
+      </button>
+      <button class="mode-btn sentence" onclick="startActivity('sentence')">
+        <span class="mode-icon">✏️</span>
+        <span class="mode-name">Sentences</span>
+        <span class="mode-desc">Fill in the missing word</span>
       </button>
     </div>
   </div>
@@ -603,6 +635,7 @@
     <div class="quiz-question">
       <div class="quiz-word" id="quiz-word">Word</div>
       <div class="quiz-word-pos" id="quiz-pos">Part of speech</div>
+      <div class="attempts-wrap" id="quiz-attempts"></div>
     </div>
     <div class="quiz-options" id="quiz-options"></div>
     <div id="quiz-feedback" style="display:none;width:100%"></div>
@@ -633,7 +666,69 @@
   </div>
 </div>
 
-<!-- SCORE SCREEN -->
+<!-- SYNONYM SCREEN -->
+<div id="synonym-screen" class="activity-screen">
+  <div class="activity-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span class="activity-title">💜 Synonyms</span>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="syn-progress"></div></div>
+    <span class="progress-text" id="syn-counter">1/10</span>
+  </div>
+  <div class="activity-body">
+    <div class="quiz-question">
+      <div style="font-size:.85rem;font-weight:800;color:#8b5cf6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Find a synonym for:</div>
+      <div class="quiz-word" id="syn-word" style="color:#7c3aed;">Word</div>
+      <div class="quiz-word-pos" id="syn-pos">Part of speech</div>
+      <div class="attempts-wrap" id="syn-attempts"></div>
+    </div>
+    <div class="quiz-options" id="syn-options"></div>
+    <div id="syn-feedback" style="display:none;width:100%"></div>
+    <button class="next-btn" id="syn-next" style="display:none" onclick="nextWordQuiz('synonym')">Next →</button>
+  </div>
+</div>
+
+<!-- ANTONYM SCREEN -->
+<div id="antonym-screen" class="activity-screen">
+  <div class="activity-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span class="activity-title">❤️ Antonyms</span>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="ant-progress"></div></div>
+    <span class="progress-text" id="ant-counter">1/10</span>
+  </div>
+  <div class="activity-body">
+    <div class="quiz-question">
+      <div style="font-size:.85rem;font-weight:800;color:#ef4444;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Find the opposite of:</div>
+      <div class="quiz-word" id="ant-word" style="color:#dc2626;">Word</div>
+      <div class="quiz-word-pos" id="ant-pos">Part of speech</div>
+      <div class="attempts-wrap" id="ant-attempts"></div>
+    </div>
+    <div class="quiz-options" id="ant-options"></div>
+    <div id="ant-feedback" style="display:none;width:100%"></div>
+    <button class="next-btn" id="ant-next" style="display:none;background:linear-gradient(135deg,#ef4444,#dc2626)" onclick="nextWordQuiz('antonym')">Next →</button>
+  </div>
+</div>
+
+<!-- SENTENCE SCREEN -->
+<div id="sentence-screen" class="activity-screen">
+  <div class="activity-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span class="activity-title">✏️ Sentences</span>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="sent-progress"></div></div>
+    <span class="progress-text" id="sent-counter">1/10</span>
+  </div>
+  <div class="activity-body">
+    <div class="quiz-question" style="text-align:left;">
+      <div style="font-size:.85rem;font-weight:800;color:#10b981;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;text-align:center;">Fill in the missing word:</div>
+      <div id="sent-sentence" style="font-size:1.15rem;font-weight:700;line-height:1.7;color:#1e1b4b;text-align:center;"></div>
+      <div class="attempts-wrap" id="sent-attempts" style="margin-top:12px;"></div>
+    </div>
+    <div class="quiz-options" id="sent-options"></div>
+    <div id="sent-feedback" style="display:none;width:100%"></div>
+    <button class="next-btn" id="sent-next" style="display:none;background:linear-gradient(135deg,#10b981,#059669)" onclick="nextWordQuiz('sentence')">Next →</button>
+  </div>
+</div>
+
+
 <div id="score-screen" class="score-screen">
   <div class="confetti-wrap" id="confetti"></div>
   <div class="score-emoji" id="score-emoji">🎉</div>
@@ -802,6 +897,103 @@ const ALL_WORDS = [
   {id:93,word:"trudge",pos:"Verb/Noun",definition:"To walk slowly and heavily with great effort",synonyms:"Plod, lumber; Traipse, slog",antonyms:null,set:"Set 4"}
 ];
 
+// ===== SENTENCES DATA =====
+const SENTENCES = {
+  "admire": "Everyone seemed to ___ the beautiful painting on the wall.",
+  "collision": "The two shopping trolleys had a ___ in the narrow aisle.",
+  "continue": "She decided to ___ reading even after the lights went off.",
+  "disappear": "The magician made the rabbit ___ in front of the crowd.",
+  "eager": "The pupils were ___ to start the science experiment.",
+  "experiment": "The scientist set up an ___ to test if plants grow faster in sunlight.",
+  "finally": "After months of waiting, the parcel ___ arrived.",
+  "flexible": "A gymnast needs to be very ___ to perform those moves.",
+  "glide": "The swan began to ___ gracefully across the still lake.",
+  "guide": "The museum offered a ___ to lead visitors around the exhibits.",
+  "interesting": "The documentary about deep-sea creatures was incredibly ___.",
+  "jealous": "He felt ___ when his friend got a bigger slice of cake.",
+  "misspell": "It is easy to ___ the word 'necessary' if you are not careful.",
+  "mumble": "Please speak clearly — don't ___ when you answer a question.",
+  "often": "She ___ visits her grandparents at weekends.",
+  "pollination": "Bees play a vital role in the ___ of flowers.",
+  "quarter": "He cut the apple into a ___ and shared it with his friend.",
+  "reflective": "The ___ surface of the mirror bounced light across the room.",
+  "tension": "There was great ___ as the players waited for the final whistle.",
+  "tremendous": "The athletes put in a ___ effort to win the race.",
+  "vibrate": "You could feel the ground ___ as the heavy lorry drove past.",
+  "voyage": "The explorers set off on a ___ across the Atlantic Ocean.",
+  "weary": "After the long hike, they were too ___ to cook dinner.",
+  "accidentally": "She ___ knocked the glass off the table while reaching for her book.",
+  "affect": "The rainy weather can ___ your mood if you spend all day indoors.",
+  "ancestor": "My ___ came from a small village in Spain many years ago.",
+  "bland": "The soup tasted very ___ because it had no seasoning at all.",
+  "border": "They crossed the ___ between France and Spain on the train.",
+  "coast": "We drove along the ___ and stopped to watch the waves.",
+  "considerate": "It was very ___ of him to hold the door open for everyone.",
+  "disobey": "The soldier refused to ___ the orders given by his commander.",
+  "disperse": "After the concert ended, the crowd began to ___ slowly.",
+  "ecstatic": "She was ___ when she found out she had won first prize.",
+  "essential": "Water is ___ for all living things to survive.",
+  "faulty": "The engineer found a ___ wire inside the broken machine.",
+  "gloomily": "He stared ___ out of the window as the rain poured down.",
+  "gradually": "The sun ___ rose above the hills as morning arrived.",
+  "intention": "Her ___ was to finish the project before the weekend.",
+  "interval": "There was a short ___ between the first and second acts of the play.",
+  "limited": "There were only a ___ number of tickets available for the show.",
+  "navigate": "It can be difficult to ___ through a busy city without a map.",
+  "perhaps": "___ we could visit the park later if the weather improves.",
+  "similar": "The two paintings looked very ___, but one was a copy.",
+  "sly": "The fox is often described as a ___ and cunning creature.",
+  "startle": "The loud thunder clap seemed to ___ everyone in the room.",
+  "vital": "It is ___ that you drink enough water during exercise.",
+  "actually": "I thought the film would be boring, but it was ___ very exciting.",
+  "deserted": "The beach was completely ___ on the cold winter morning.",
+  "devour": "The hungry dog managed to ___ the entire bowl of food in seconds.",
+  "dominate": "The tall player seemed to ___ every part of the basketball game.",
+  "fortunate": "We were very ___ to find shelter before the storm arrived.",
+  "fragile": "Please handle the ancient vase carefully — it is extremely ___.",
+  "grimy": "His hands were ___ after spending the afternoon fixing the bike.",
+  "hostile": "The travellers felt unwelcome in the ___ environment of the frozen tundra.",
+  "illusion": "The magician created the ___ that he had read her mind.",
+  "immortal": "In the legend, the hero drank a potion that made him ___.",
+  "incredibly": "The acrobat was ___ skilled, performing flips with ease.",
+  "permanent": "The ink is ___, so be careful not to get it on your clothes.",
+  "predator": "The lion is a fearsome ___ that hunts across the open plains.",
+  "temporary": "The roadworks caused only ___ disruption to traffic.",
+  "request": "She made a polite ___ for a glass of water.",
+  "response": "The teacher was pleased with the thoughtful ___ from the class.",
+  "revolting": "The smell coming from the bin was absolutely ___.",
+  "rotate": "The Earth takes twenty-four hours to ___ on its axis.",
+  "scenery": "The ___ in the Scottish Highlands is breathtakingly beautiful.",
+  "toil": "The farmers would ___ in the fields from sunrise to sunset.",
+  "unique": "Each snowflake is thought to be completely ___ in shape.",
+  "valiant": "The firefighters made a ___ effort to save the trapped family.",
+  "wince": "He could not help but ___ when the dentist began to drill.",
+  "alter": "The tailor offered to ___ the jacket so it would fit better.",
+  "archaeologist": "The ___ carefully brushed the soil away from the ancient coin.",
+  "ascend": "The climbers prepared to ___ the steep face of the mountain.",
+  "courteous": "The hotel receptionist was warm and ___ to every guest.",
+  "emit": "The volcano began to ___ a thick cloud of grey smoke.",
+  "evade": "The clever fox managed to ___ the hounds for several hours.",
+  "fare": "He checked his wallet to make sure he had enough money for the bus ___.",
+  "fatigued": "After three days without sleep, the doctor was completely ___.",
+  "fortify": "The army worked through the night to ___ the castle walls.",
+  "insulate": "We used thick foam to ___ the walls and keep the house warm.",
+  "intricate": "The spider had woven an ___ web between the two fence posts.",
+  "jagged": "She cut her finger on the ___ edge of the broken glass.",
+  "ordeal": "Sitting through four hours of exams was quite an ___ for everyone.",
+  "particularly": "She was ___ good at maths, often finishing the tests early.",
+  "prefer": "Most children ___ to play outside rather than sitting indoors.",
+  "pristine": "The car looked ___, as though it had just come from the factory.",
+  "reliable": "A good friend is someone who is always ___ and honest.",
+  "scowl": "The teacher gave a stern ___ when the class became too noisy.",
+  "shrill": "The ___ sound of the alarm woke everyone up at six in the morning.",
+  "spacious": "The new classroom was bright and ___, with room for thirty desks.",
+  "spontaneous": "The ___ decision to go for a picnic turned out to be a great idea.",
+  "tranquil": "The garden was beautifully ___ in the early hours of the morning.",
+  "triumph": "Winning the championship was the greatest ___ of her career.",
+  "trudge": "They had to ___ through thick mud to reach the other side of the field."
+};
+
 // ===== STATE =====
 let selectedSets = new Set(['Set 1']);
 let activeMode = null;
@@ -823,6 +1015,14 @@ let matchRoundIdx = 0;
 let matchSelected = null;
 let matchMatchedCount = 0;
 let matchTotalPairs = 0;
+
+// Word-Quiz State (shared by synonym, antonym, sentence)
+let wqWords = [];
+let wqIdx = 0;
+let wqScore = 0;
+let wqMode = '';
+let wqAttempts = 0;
+const MAX_ATTEMPTS = 2;
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -880,6 +1080,15 @@ function startActivity(mode) {
   if (mode === 'flashcard') startFlashcard();
   else if (mode === 'quiz') startQuiz();
   else if (mode === 'match') startMatch();
+  else if (mode === 'synonym') startWordQuiz('synonym');
+  else if (mode === 'antonym') {
+    // Only use words that have antonyms
+    const antWords = activeWords.filter(w => w.antonyms);
+    if (antWords.length < 4) { alert('Not enough words with antonyms in the selected sets. Try adding more sets!'); return; }
+    activeWords = antWords;
+    startWordQuiz('antonym');
+  }
+  else if (mode === 'sentence') startWordQuiz('sentence');
 }
 
 // ===== FLASHCARD =====
@@ -937,6 +1146,7 @@ function fcNav(dir) {
 }
 
 // ===== QUIZ =====
+let quizAttempts = 0;
 function startQuiz() {
   quizWords = shuffle([...activeWords]).slice(0, Math.min(10, activeWords.length));
   quizIdx = 0;
@@ -951,11 +1161,21 @@ function renderQuiz() {
     return;
   }
   quizAnswered = false;
+  quizAttempts = 0;
   const w = quizWords[quizIdx];
   document.getElementById('quiz-word').textContent = w.word;
   document.getElementById('quiz-pos').textContent = w.pos;
   document.getElementById('quiz-feedback').style.display = 'none';
   document.getElementById('quiz-next').style.display = 'none';
+  // Render attempt dots
+  const dotsWrap = document.getElementById('quiz-attempts');
+  dotsWrap.innerHTML = '';
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'attempt-dot available';
+    dot.id = 'quiz-dot-' + i;
+    dotsWrap.appendChild(dot);
+  }
   // Auto-speak the word
   setTimeout(() => sayWord(w.word), 300);
 
@@ -970,6 +1190,7 @@ function renderQuiz() {
     const btn = document.createElement('button');
     btn.className = 'option-btn';
     btn.textContent = opt.definition.length > 80 ? opt.definition.slice(0, 78) + '…' : opt.definition;
+    btn.dataset.id = opt.id;
     btn.onclick = () => answerQuiz(opt.id === w.id, btn);
     container.appendChild(btn);
   });
@@ -980,27 +1201,39 @@ function renderQuiz() {
 }
 
 function answerQuiz(correct, btn) {
-  if (quizAnswered) return;
-  quizAnswered = true;
+  if (btn.disabled) return;
+  const w = quizWords[quizIdx];
   const allBtns = document.querySelectorAll('#quiz-options .option-btn');
-  allBtns.forEach(b => b.disabled = true);
 
   if (correct) {
+    allBtns.forEach(b => b.disabled = true);
     btn.classList.add('correct');
     quizScore++;
     showFeedback('✅ Correct! Great job! 🌟', true);
+    document.getElementById('quiz-next').style.display = 'block';
+    quizAnswered = true;
   } else {
+    quizAttempts++;
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+      const dot = document.getElementById('quiz-dot-' + i);
+      if (dot) dot.className = 'attempt-dot ' + (i < quizAttempts ? 'used' : 'available');
+    }
     btn.classList.add('wrong');
-    // highlight correct
-    const w = quizWords[quizIdx];
-    allBtns.forEach(b => {
-      if (b.textContent === w.definition || w.definition.startsWith(b.textContent.replace('…', ''))) {
-        b.classList.add('correct');
-      }
-    });
-    showFeedback('❌ Not quite... The correct meaning has been highlighted.', false);
+    btn.disabled = true;
+
+    if (quizAttempts >= MAX_ATTEMPTS) {
+      allBtns.forEach(b => {
+        b.disabled = true;
+        if (b.dataset.id == w.id) b.classList.add('correct');
+      });
+      showFeedback('❌ Out of attempts! The correct answer is highlighted.', false);
+      document.getElementById('quiz-next').style.display = 'block';
+      quizAnswered = true;
+    } else {
+      showFeedback('❌ Not quite — you have 1 more attempt!', false);
+      setTimeout(() => { document.getElementById('quiz-feedback').style.display = 'none'; }, 1500);
+    }
   }
-  document.getElementById('quiz-next').style.display = 'block';
 }
 
 function showFeedback(msg, correct) {
@@ -1132,21 +1365,159 @@ function nextMatchRound() {
   if (!hasMore) showScore('match');
 }
 
+// ===== SYNONYM / ANTONYM / SENTENCE (shared engine) =====
+function startWordQuiz(mode) {
+  wqMode = mode;
+  wqWords = shuffle([...activeWords]).slice(0, Math.min(10, activeWords.length));
+  wqIdx = 0;
+  wqScore = 0;
+  renderWordQuiz();
+  showScreen(mode + '-screen');
+}
+
+function pfx(mode) {
+  return mode === 'synonym' ? 'syn' : mode === 'antonym' ? 'ant' : 'sent';
+}
+
+function renderWordQuiz() {
+  if (wqIdx >= wqWords.length) { showScore(wqMode); return; }
+  wqAttempts = 0;
+  const w = wqWords[wqIdx];
+  const p = pfx(wqMode);
+
+  // Update progress
+  const pct = (wqIdx / wqWords.length) * 100;
+  document.getElementById(p + '-progress').style.width = pct + '%';
+  document.getElementById(p + '-counter').textContent = (wqIdx + 1) + '/' + wqWords.length;
+
+  // Hide feedback / next
+  document.getElementById(p + '-feedback').style.display = 'none';
+  document.getElementById(p + '-next').style.display = 'none';
+
+  // Render attempts dots
+  renderAttemptDots(p);
+
+  // Speak word (only for synonym and antonym, not sentence)
+  if (wqMode !== 'sentence') setTimeout(() => sayWord(w.word), 300);
+
+  // Build options
+  let correct, wrongPool, optionKey;
+  if (wqMode === 'synonym') {
+    // correct = first synonym of this word; wrong = first synonyms from other words
+    correct = { id: w.id, text: w.synonyms.split(',')[0].trim() };
+    document.getElementById('syn-word').textContent = w.word;
+    document.getElementById('syn-pos').textContent = w.pos;
+    wrongPool = ALL_WORDS.filter(x => x.id !== w.id && x.synonyms)
+      .map(x => ({ id: x.id, text: x.synonyms.split(',')[0].trim() }));
+  } else if (wqMode === 'antonym') {
+    correct = { id: w.id, text: w.antonyms.split(',')[0].trim() };
+    document.getElementById('ant-word').textContent = w.word;
+    document.getElementById('ant-pos').textContent = w.pos;
+    wrongPool = ALL_WORDS.filter(x => x.id !== w.id && x.antonyms)
+      .map(x => ({ id: x.id, text: x.antonyms.split(',')[0].trim() }));
+  } else {
+    // sentence
+    const sentence = SENTENCES[w.word] || ('She was very ___ today.');
+    document.getElementById('sent-sentence').innerHTML = sentence.replace('___', '<strong style="color:#10b981;font-size:1.3rem;">___</strong>');
+    correct = { id: w.id, text: w.word };
+    wrongPool = ALL_WORDS.filter(x => x.id !== w.id)
+      .map(x => ({ id: x.id, text: x.word }));
+  }
+
+  const wrong = shuffle(wrongPool).slice(0, 3);
+  const opts = shuffle([correct, ...wrong]);
+
+  const container = document.getElementById(p + '-options');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.text;
+    btn.dataset.id = opt.id;
+    btn.onclick = () => answerWordQuiz(opt.id === w.id, btn, p, w);
+    container.appendChild(btn);
+  });
+}
+
+function renderAttemptDots(p) {
+  const wrap = document.getElementById(p + '-attempts');
+  wrap.innerHTML = '';
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'attempt-dot available';
+    dot.id = p + '-dot-' + i;
+    wrap.appendChild(dot);
+  }
+}
+
+function updateAttemptDots(p) {
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    const dot = document.getElementById(p + '-dot-' + i);
+    if (dot) dot.className = 'attempt-dot ' + (i < wqAttempts ? 'used' : 'available');
+  }
+}
+
+function answerWordQuiz(correct, btn, p, w) {
+  const allBtns = document.querySelectorAll('#' + p + '-options .option-btn');
+  if (btn.disabled) return;
+
+  if (correct) {
+    allBtns.forEach(b => b.disabled = true);
+    btn.classList.add('correct');
+    wqScore++;
+    showWqFeedback(p, '✅ Correct! Brilliant! 🌟', true);
+    document.getElementById(p + '-next').style.display = 'block';
+  } else {
+    wqAttempts++;
+    updateAttemptDots(p);
+    btn.classList.add('wrong');
+    btn.disabled = true;
+
+    if (wqAttempts >= MAX_ATTEMPTS) {
+      // Out of attempts — reveal answer
+      allBtns.forEach(b => {
+        b.disabled = true;
+        if (b.dataset.id == w.id) b.classList.add('correct');
+      });
+      showWqFeedback(p, '❌ Out of attempts! The correct answer is highlighted.', false);
+      document.getElementById(p + '-next').style.display = 'block';
+    } else {
+      showWqFeedback(p, '❌ Not quite — you have 1 more attempt!', false);
+      setTimeout(() => {
+        document.getElementById(p + '-feedback').style.display = 'none';
+      }, 1500);
+    }
+  }
+}
+
+function showWqFeedback(p, msg, correct) {
+  const fb = document.getElementById(p + '-feedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (correct ? 'correct' : 'wrong');
+  fb.textContent = msg;
+}
+
+function nextWordQuiz(mode) {
+  wqIdx++;
+  renderWordQuiz();
+}
+
 // ===== SCORE =====
 function showScore(mode) {
-  const screen = document.getElementById('score-screen');
   let emoji, title, numText, sub;
+  const isWq = ['synonym','antonym','sentence'].includes(mode);
 
-  if (mode === 'quiz') {
-    const pct = quizScore / quizWords.length;
-    numText = quizScore + '/' + quizWords.length;
+  if (mode === 'quiz' || isWq) {
+    const total = mode === 'quiz' ? quizWords.length : wqWords.length;
+    const score = mode === 'quiz' ? quizScore : wqScore;
+    const pct = score / total;
+    numText = score + '/' + total;
     if (pct === 1) { emoji = '🏆'; title = 'PERFECT!'; sub = 'You got every single one! Amazing! 🌟'; }
     else if (pct >= .8) { emoji = '🎉'; title = 'Excellent!'; sub = "You're crushing it! Keep going! 💪"; }
-    else if (pct >= .6) { emoji = '👍'; title = 'Good job!'; sub = 'Solid effort! A bit more practice and you\'ll ace it!'; }
+    else if (pct >= .6) { emoji = '👍'; title = 'Good job!'; sub = "Solid effort! A bit more practice and you'll ace it!"; }
     else { emoji = '📚'; title = 'Keep trying!'; sub = 'Learning takes practice — you\'ve got this!'; }
   } else if (mode === 'match') {
-    emoji = '🎯';
-    title = 'All Matched!';
+    emoji = '🎯'; title = 'All Matched!';
     numText = matchMatchedCount + ' pairs';
     sub = 'You matched all the words! Great work! 🌈';
   }
@@ -1155,7 +1526,6 @@ function showScore(mode) {
   document.getElementById('score-title').textContent = title;
   document.getElementById('score-num').textContent = numText;
   document.getElementById('score-sub').textContent = sub;
-
   document.getElementById('score-retry').onclick = () => startActivity(mode);
 
   showScreen('score-screen');
