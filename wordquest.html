@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Word Quest 🌟</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --set1: #a855f7; --set1-light: #f3e8ff; --set1-dark: #7e22ce;
+    --set2: #f59e0b; --set2-light: #fef3c7; --set2-dark: #b45309;
+    --set3: #14b8a6; --set3-light: #ccfbf1; --set3-dark: #0f766e;
+    --set4: #3b82f6; --set4-light: #dbeafe; --set4-dark: #1d4ed8;
+    --bg: #fdf4ff;
+    --card-bg: #ffffff;
+    --text: #1e1b4b;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ===== HOME SCREEN ===== */
+  #home-screen {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fdf4ff 0%, #eff6ff 50%, #f0fdf4 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  .app-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    background: linear-gradient(135deg, #a855f7, #3b82f6, #14b8a6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+    text-align: center;
+    filter: drop-shadow(0 2px 4px rgba(168,85,247,0.2));
+  }
+  .app-subtitle {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 36px;
+    font-weight: 600;
+  }
+
+  /* Set Selector */
+  .sets-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 36px;
+  }
+  .set-card {
+    border-radius: 24px;
+    padding: 22px 20px;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    border: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+  }
+  .set-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    opacity: .12;
+    background: radial-gradient(circle at 70% 30%, white, transparent 60%);
+  }
+  .set-card:active { transform: scale(.96); }
+  .set-card.selected { border-color: rgba(255,255,255,.7); box-shadow: 0 0 0 4px rgba(255,255,255,.5), 0 8px 30px rgba(0,0,0,.18); transform: scale(1.03); }
+  .set-card.set1 { background: linear-gradient(135deg, #a855f7, #7c3aed); color: white; }
+  .set-card.set2 { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+  .set-card.set3 { background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; }
+  .set-card.set4 { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+  .set-card h3 { font-family: 'Fredoka One', cursive; font-size: 1.5rem; margin-bottom: 4px; }
+  .set-card p { font-size: .88rem; opacity: .9; font-weight: 600; }
+  .set-check {
+    position: absolute; top: 12px; right: 12px;
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    transition: all .2s;
+  }
+  .set-card.selected .set-check { background: white; }
+  .set-card:not(.selected) .set-check::after { content: '○'; color: rgba(255,255,255,.7); }
+  .set-card.selected .set-check::after { content: '✓'; color: var(--text); }
+
+  /* Mode Buttons */
+  .modes-section { width: 100%; max-width: 700px; }
+  .modes-label {
+    font-size: .85rem; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 14px; text-align: center;
+  }
+  .modes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .mode-btn {
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 20px 12px;
+    cursor: pointer;
+    transition: all .15s;
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    font-family: 'Nunito', sans-serif;
+    user-select: none;
+  }
+  .mode-btn:active { transform: scale(.95); }
+  .mode-btn .mode-icon { font-size: 2.4rem; }
+  .mode-btn .mode-name { font-weight: 800; font-size: .95rem; color: var(--text); }
+  .mode-btn .mode-desc { font-size: .75rem; color: var(--muted); font-weight: 600; text-align: center; }
+  .mode-btn.flash { box-shadow: 0 4px 20px rgba(168,85,247,.25); border: 2.5px solid #a855f7; }
+  .mode-btn.quiz { box-shadow: 0 4px 20px rgba(245,158,11,.25); border: 2.5px solid #f59e0b; }
+  .mode-btn.match { box-shadow: 0 4px 20px rgba(20,184,166,.25); border: 2.5px solid #14b8a6; }
+
+  /* ===== ACTIVITY SCREENS ===== */
+  .activity-screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    padding: 0;
+  }
+  .activity-screen.active { display: flex; }
+
+  .activity-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 24px 16px;
+    gap: 16px;
+    position: sticky; top: 0;
+    backdrop-filter: blur(10px);
+    background: rgba(253,244,255,.9);
+    z-index: 10;
+    border-bottom: 2px solid rgba(168,85,247,.1);
+  }
+  .back-btn {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: transform .1s;
+  }
+  .back-btn:active { transform: scale(.9); }
+  .activity-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    flex: 1;
+  }
+  .progress-bar-wrap {
+    flex: 1;
+    height: 10px;
+    background: rgba(0,0,0,.08);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #a855f7, #3b82f6);
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+  .progress-text {
+    font-weight: 800;
+    font-size: .9rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .activity-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px 40px;
+    gap: 20px;
+    max-width: 760px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* ===== FLASHCARD ===== */
+  .flashcard-container {
+    perspective: 1200px;
+    width: 100%;
+    max-width: 600px;
+    height: 340px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .flashcard-inner {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.4,0,.2,1);
+  }
+  .flashcard-inner.flipped { transform: rotateY(180deg); }
+  .flashcard-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,.12);
+  }
+  .flashcard-front {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color: white;
+  }
+  .flashcard-back {
+    background: white;
+    transform: rotateY(180deg);
+    border: 3px solid #f3e8ff;
+  }
+  .card-word {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.2rem, 7vw, 3.2rem);
+    margin-bottom: 8px;
+  }
+  .card-pos {
+    background: rgba(255,255,255,.2);
+    padding: 4px 14px;
+    border-radius: 99px;
+    font-size: .9rem;
+    font-weight: 700;
+  }
+  .flip-hint {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    font-size: .8rem;
+    opacity: .6;
+    font-weight: 700;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .speak-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255,255,255,.22);
+    border: 2px solid rgba(255,255,255,.4);
+    border-radius: 50%;
+    width: 46px; height: 46px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+    backdrop-filter: blur(4px);
+    z-index: 2;
+  }
+  .speak-btn:active { transform: scale(.88); background: rgba(255,255,255,.4); }
+  .speak-btn.speaking {
+    background: rgba(255,255,255,.45);
+    animation: speakPulse .6s ease-in-out infinite alternate;
+  }
+  @keyframes speakPulse {
+    from { box-shadow: 0 0 0 0 rgba(255,255,255,.5); }
+    to   { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  }
+  .card-definition {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .card-synonyms {
+    font-size: .88rem;
+    color: #7c3aed;
+    font-weight: 700;
+  }
+  .card-antonyms {
+    font-size: .88rem;
+    color: #dc2626;
+    font-weight: 700;
+  }
+  .card-set-badge {
+    position: absolute;
+    top: 14px; left: 14px;
+    font-size: .75rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: rgba(255,255,255,.2);
+    color: white;
+  }
+  .card-set-badge.back {
+    background: var(--set1-light);
+    color: var(--set1-dark);
+  }
+
+  .fc-nav {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .nav-btn {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 56px; height: 56px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,.1);
+    transition: all .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:active { transform: scale(.9); }
+  .nav-btn:disabled { opacity: .35; cursor: default; }
+  .card-counter {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--muted);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* ===== QUIZ ===== */
+  .quiz-question {
+    width: 100%;
+    background: white;
+    border-radius: 24px;
+    padding: 28px 24px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.08);
+    text-align: center;
+  }
+  .quiz-word {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3rem);
+    color: #7c3aed;
+    margin-bottom: 6px;
+  }
+  .quiz-word-pos {
+    font-size: .9rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .quiz-options {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .option-btn {
+    background: white;
+    border: 3px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 16px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.4;
+    transition: all .15s;
+    min-height: 70px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .option-btn:active:not(:disabled) { transform: scale(.97); }
+  .option-btn.correct { background: #dcfce7; border-color: #16a34a; color: #15803d; }
+  .option-btn.wrong { background: #fee2e2; border-color: #dc2626; color: #dc2626; }
+  .option-btn:disabled { cursor: default; }
+
+  .feedback-box {
+    width: 100%;
+    border-radius: 18px;
+    padding: 16px 20px;
+    font-weight: 800;
+    font-size: 1rem;
+    text-align: center;
+    animation: fadeIn .3s ease;
+  }
+  .feedback-box.correct { background: #dcfce7; color: #15803d; }
+  .feedback-box.wrong { background: #fee2e2; color: #b91c1c; }
+
+  .next-btn {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: 99px;
+    padding: 16px 48px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(124,58,237,.35);
+    transition: all .15s;
+  }
+  .next-btn:active { transform: scale(.97); }
+
+  /* ===== MATCH ===== */
+  .match-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .match-col { display: flex; flex-direction: column; gap: 12px; }
+  .match-col-label {
+    font-size: .8rem; font-weight: 800; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+    text-align: center; margin-bottom: 4px;
+  }
+  .match-tile {
+    background: white;
+    border: 3px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 14px 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: .92rem;
+    text-align: center;
+    line-height: 1.4;
+    transition: all .15s;
+    min-height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none;
+  }
+  .match-tile.word { font-family: 'Fredoka One', cursive; font-size: 1.05rem; color: #7c3aed; border-color: #d8b4fe; background: #faf5ff; }
+  .match-tile.def { color: var(--text); font-size: .85rem; }
+  .match-tile:active { transform: scale(.97); }
+  .match-tile.selected { border-color: #a855f7; background: #f3e8ff; box-shadow: 0 0 0 3px rgba(168,85,247,.2); }
+  .match-tile.matched { border-color: #16a34a; background: #dcfce7; color: #15803d; cursor: default; opacity: .8; }
+  .match-tile.wrong-shake { animation: shake .4s; border-color: #dc2626; background: #fee2e2; }
+
+  /* ===== SCORE SCREEN ===== */
+  .score-screen {
+    display: none;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fdf4ff, #eff6ff);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .score-screen.active { display: flex; }
+  .score-emoji { font-size: 5rem; margin-bottom: 16px; }
+  .score-title { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: #7c3aed; margin-bottom: 8px; }
+  .score-num { font-family: 'Fredoka One', cursive; font-size: 4rem; background: linear-gradient(135deg, #a855f7, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .score-sub { font-size: 1rem; color: var(--muted); font-weight: 700; margin-bottom: 36px; }
+  .score-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .score-btn {
+    border: none;
+    border-radius: 99px;
+    padding: 14px 32px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .score-btn:active { transform: scale(.95); }
+  .score-btn.primary { background: linear-gradient(135deg, #a855f7, #7c3aed); color: white; box-shadow: 0 6px 20px rgba(124,58,237,.3); }
+  .score-btn.secondary { background: white; color: #7c3aed; box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+
+  /* Confetti */
+  .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
+  .confetti-piece {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    60% { transform: translateX(8px); }
+    80% { transform: translateX(-4px); }
+  }
+  @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+  .pop { animation: pop .3s ease; }
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="home-screen">
+  <div class="app-title">✨ Word Quest</div>
+  <div class="app-subtitle">Choose your word sets & activity!</div>
+
+  <div class="sets-grid">
+    <div class="set-card set1" data-set="Set 1" onclick="toggleSet(this)">
+      <div class="set-check"></div>
+      <h3>Set 1 💜</h3>
+      <p>24 words — Purple</p>
+    </div>
+    <div class="set-card set2" data-set="Set 2" onclick="toggleSet(this)">
+      <div class="set-check"></div>
+      <h3>Set 2 💛</h3>
+      <p>22 words — Yellow</p>
+    </div>
+    <div class="set-card set3" data-set="Set 3" onclick="toggleSet(this)">
+      <div class="set-check"></div>
+      <h3>Set 3 🩵</h3>
+      <p>9 words — Teal</p>
+    </div>
+    <div class="set-card set4" data-set="Set 4" onclick="toggleSet(this)">
+      <div class="set-check"></div>
+      <h3>Set 4 💙</h3>
+      <p>38 words — Blue</p>
+    </div>
+  </div>
+
+  <div class="modes-section">
+    <div class="modes-label">Choose activity</div>
+    <div class="modes-grid">
+      <button class="mode-btn flash" onclick="startActivity('flashcard')">
+        <span class="mode-icon">🃏</span>
+        <span class="mode-name">Flashcards</span>
+        <span class="mode-desc">Flip to reveal meaning</span>
+      </button>
+      <button class="mode-btn quiz" onclick="startActivity('quiz')">
+        <span class="mode-icon">❓</span>
+        <span class="mode-name">Quiz</span>
+        <span class="mode-desc">Pick the right answer</span>
+      </button>
+      <button class="mode-btn match" onclick="startActivity('match')">
+        <span class="mode-icon">🔗</span>
+        <span class="mode-name">Match</span>
+        <span class="mode-desc">Connect word to meaning</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FLASHCARD SCREEN -->
+<div id="flashcard-screen" class="activity-screen">
+  <div class="activity-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span class="activity-title">🃏 Flashcards</span>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="fc-progress"></div></div>
+    <span class="progress-text" id="fc-counter">1/20</span>
+  </div>
+  <div class="activity-body">
+    <div class="flashcard-container" id="fc-container" onclick="flipCard()">
+      <div class="flashcard-inner" id="fc-inner">
+        <div class="flashcard-face flashcard-front" id="fc-front">
+          <div class="card-set-badge" id="fc-set-badge">Set 1</div>
+          <button class="speak-btn" id="fc-speak-btn" onclick="speakWord(event)" title="Hear pronunciation">🔊</button>
+          <div class="card-word" id="fc-word">Word</div>
+          <div class="card-pos" id="fc-pos">Noun</div>
+          <div id="fc-phonetic" style="font-size:.95rem;opacity:.75;margin-top:6px;font-weight:600;letter-spacing:.03em;"></div>
+          <div class="flip-hint">Tap card to flip 👆</div>
+        </div>
+        <div class="flashcard-face flashcard-back" id="fc-back">
+          <div class="card-set-badge back" id="fc-set-badge-back">Set 1</div>
+          <div class="card-definition" id="fc-def">Definition goes here</div>
+          <div class="card-synonyms" id="fc-syn"></div>
+          <div class="card-antonyms" id="fc-ant"></div>
+          <div class="flip-hint" style="color: #6b7280;">Tap to flip 👆</div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-nav">
+      <button class="nav-btn" id="fc-prev" onclick="fcNav(-1)">◀</button>
+      <span class="card-counter" id="fc-nav-counter">1 / 20</span>
+      <button class="nav-btn" id="fc-next" onclick="fcNav(1)">▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz-screen" class="activity-screen">
+  <div class="activity-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span class="activity-title">❓ Quiz</span>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="quiz-progress"></div></div>
+    <span class="progress-text" id="quiz-counter">1/10</span>
+  </div>
+  <div class="activity-body">
+    <div class="quiz-question">
+      <div class="quiz-word" id="quiz-word">Word</div>
+      <div class="quiz-word-pos" id="quiz-pos">Part of speech</div>
+    </div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div id="quiz-feedback" style="display:none;width:100%"></div>
+    <button class="next-btn" id="quiz-next" style="display:none" onclick="nextQuiz()">Next →</button>
+  </div>
+</div>
+
+<!-- MATCH SCREEN -->
+<div id="match-screen" class="activity-screen">
+  <div class="activity-header">
+    <button class="back-btn" onclick="goHome()">←</button>
+    <span class="activity-title">🔗 Match</span>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="match-progress"></div></div>
+    <span class="progress-text" id="match-counter">0/6</span>
+  </div>
+  <div class="activity-body" style="padding-top:16px">
+    <div class="match-grid">
+      <div class="match-col">
+        <div class="match-col-label">📖 Words</div>
+        <div id="match-words"></div>
+      </div>
+      <div class="match-col">
+        <div class="match-col-label">💡 Meanings</div>
+        <div id="match-defs"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="match-next" style="display:none" onclick="nextMatchRound()">Next Round →</button>
+  </div>
+</div>
+
+<!-- SCORE SCREEN -->
+<div id="score-screen" class="score-screen">
+  <div class="confetti-wrap" id="confetti"></div>
+  <div class="score-emoji" id="score-emoji">🎉</div>
+  <div class="score-title" id="score-title">Awesome!</div>
+  <div class="score-num" id="score-num">8/10</div>
+  <div class="score-sub" id="score-sub">You're a Word Champion!</div>
+  <div class="score-btns">
+    <button class="score-btn primary" id="score-retry">Try Again 🔄</button>
+    <button class="score-btn secondary" onclick="goHome()">Home 🏠</button>
+  </div>
+</div>
+
+<script>
+// ===== PHONETICS =====
+const PHONETICS = {
+  "admire": "ad-MIRE", "collision": "cuh-LIH-zhun", "continue": "cun-TIN-yoo",
+  "disappear": "dis-uh-PEER", "eager": "EE-ger", "experiment": "ex-PEAR-ih-ment",
+  "finally": "FY-nuh-lee", "flexible": "FLEX-ih-bul", "glide": "GLYDE",
+  "guide": "GYDE", "interesting": "IN-tres-ting", "jealous": "JEL-us",
+  "misspell": "mis-SPELL", "mumble": "MUM-bul", "often": "OFF-un",
+  "pollination": "pol-ih-NAY-shun", "quarter": "KWOR-ter", "reflective": "reh-FLEK-tiv",
+  "tension": "TEN-shun", "tremendous": "treh-MEN-dus", "vibrate": "VY-brayt",
+  "voyage": "VOY-ij", "weary": "WEER-ee", "accidentally": "ax-ih-DEN-tuh-lee",
+  "affect": "uh-FEKT", "ancestor": "AN-ses-ter", "bland": "BLAND",
+  "border": "BOR-der", "coast": "KOHST", "considerate": "kun-SID-er-ut",
+  "disobey": "dis-oh-BAY", "disperse": "dis-PURSE", "ecstatic": "ex-STAT-ik",
+  "essential": "eh-SEN-shul", "faulty": "FAWL-tee", "gloomily": "GLOOM-ih-lee",
+  "gradually": "GRAJ-oo-uh-lee", "intention": "in-TEN-shun", "interval": "IN-ter-vul",
+  "limited": "LIM-ih-tid", "navigate": "NAV-ih-gayt", "perhaps": "per-HAPS",
+  "similar": "SIM-ih-ler", "sly": "SLY", "startle": "STAR-tul",
+  "vital": "VY-tul", "actually": "AK-choo-uh-lee", "deserted": "deh-ZUR-tid",
+  "devour": "deh-VOWR", "dominate": "DOM-ih-nayt", "fortunate": "FOR-chuh-nut",
+  "fragile": "FRAJ-ul", "grimy": "GRY-mee", "hostile": "HOS-tul",
+  "illusion": "ih-LOO-zhun", "immortal": "ih-MOR-tul", "incredibly": "in-KRED-ih-blee",
+  "permanent": "PUR-muh-nunt", "predator": "PRED-uh-ter", "temporary": "TEM-puh-reh-ree",
+  "request": "reh-KWEST", "response": "reh-SPONS", "revolting": "reh-VOHL-ting",
+  "rotate": "ROH-tayt", "scenery": "SEE-nuh-ree", "toil": "TOYL",
+  "unique": "yoo-NEEK", "valiant": "VAL-ee-unt", "wince": "WINTS",
+  "alter": "AWL-ter", "archaeologist": "ar-kee-OL-uh-jist", "ascend": "uh-SEND",
+  "courteous": "KUR-tee-us", "emit": "eh-MIT", "evade": "eh-VAYD",
+  "fare": "FAIR", "fatigued": "fuh-TEEGD", "fortify": "FOR-tih-fy",
+  "insulate": "IN-syoo-layt", "intricate": "IN-trih-kut", "jagged": "JAG-id",
+  "ordeal": "or-DEEL", "particularly": "par-TIK-yoo-ler-lee", "prefer": "preh-FUR",
+  "pristine": "PRIS-teen", "reliable": "reh-LY-uh-bul", "scowl": "SKOWL",
+  "shrill": "SHRIL", "spacious": "SPAY-shus", "spontaneous": "spon-TAY-nee-us",
+  "tranquil": "TRAN-kwil", "triumph": "TRY-umf", "trudge": "TRUJ"
+};
+
+// ===== SPEECH =====
+let currentUtterance = null;
+function speakWord(e) {
+  e.stopPropagation(); // don't flip the card
+  const word = document.getElementById('fc-word').textContent;
+  if (!word || !window.speechSynthesis) return;
+
+  // Stop any ongoing speech
+  window.speechSynthesis.cancel();
+  const btn = document.getElementById('fc-speak-btn');
+
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = 'en-GB';
+  utter.rate = 0.85;
+  utter.pitch = 1.0;
+
+  utter.onstart = () => {
+    btn.textContent = '🔉';
+    btn.classList.add('speaking');
+  };
+  utter.onend = utter.onerror = () => {
+    btn.textContent = '🔊';
+    btn.classList.remove('speaking');
+  };
+
+  window.speechSynthesis.speak(utter);
+  currentUtterance = utter;
+}
+
+
+const ALL_WORDS = [
+  {id:1,word:"admire",pos:"Verb",definition:"To think positively of someone or something",synonyms:"Respect, appreciate",antonyms:"Dislike, disapprove of",set:"Set 1"},
+  {id:2,word:"collision",pos:"Noun",definition:"The act of two or more things hitting each other",synonyms:"Crash, bump, accident",antonyms:null,set:"Set 1"},
+  {id:3,word:"continue",pos:"Verb",definition:"To carry on with an action; also to carry on after a pause",synonyms:"Carry on, go on, remain; Proceed, resume",antonyms:null,set:"Set 1"},
+  {id:4,word:"disappear",pos:"Verb",definition:"To stop being visible",synonyms:"Vanish, fade",antonyms:"Appear, reappear",set:"Set 1"},
+  {id:5,word:"eager",pos:"Adjective",definition:"Wanting something very much",synonyms:"Keen, impatient",antonyms:"Reluctant",set:"Set 1"},
+  {id:6,word:"experiment",pos:"Noun/Verb",definition:"A test to discover or learn something; To try something new",synonyms:"Test, trial; Explore, try",antonyms:null,set:"Set 1"},
+  {id:7,word:"finally",pos:"Adverb",definition:"After a long wait; or as the last step in a series of events",synonyms:"Eventually, in the end; Lastly",antonyms:null,set:"Set 1"},
+  {id:8,word:"flexible",pos:"Adjective",definition:"Able to bend easily; also able to be easily adapted or changed",synonyms:"Bendy, elastic; Adaptable, adjustable",antonyms:null,set:"Set 1"},
+  {id:9,word:"glide",pos:"Verb/Noun",definition:"To move with a smooth, continuous motion",synonyms:"Soar, sail, float, slide",antonyms:null,set:"Set 1"},
+  {id:10,word:"guide",pos:"Verb/Noun",definition:"To direct or lead through unfamiliar places",synonyms:"Show, escort, navigate",antonyms:null,set:"Set 1"},
+  {id:11,word:"interesting",pos:"Adjective",definition:"Capable of holding someone's attention or curiosity",synonyms:"Fascinating, engaging, intriguing",antonyms:"Boring, dull",set:"Set 1"},
+  {id:12,word:"jealous",pos:"Adjective",definition:"Being upset or angry because you wish to have what another has",synonyms:"Envious",antonyms:"Content, satisfied",set:"Set 1"},
+  {id:13,word:"misspell",pos:"Verb",definition:"To spell a word incorrectly",synonyms:"Miswrite",antonyms:null,set:"Set 1"},
+  {id:14,word:"mumble",pos:"Verb/Noun",definition:"To speak in a quiet, unclear voice",synonyms:"Mutter, murmur",antonyms:null,set:"Set 1"},
+  {id:15,word:"often",pos:"Adverb",definition:"On a regular basis",synonyms:"Frequently, regularly, usually",antonyms:"Rarely, infrequently, seldom",set:"Set 1"},
+  {id:16,word:"pollination",pos:"Noun",definition:"The act of transferring pollen from one flower to another for fertilisation",synonyms:"Fertilisation, reproduction",antonyms:null,set:"Set 1"},
+  {id:17,word:"quarter",pos:"Noun/Verb",definition:"One out of four equal parts",synonyms:"Fourth",antonyms:null,set:"Set 1"},
+  {id:18,word:"reflective",pos:"Adjective",definition:"Capable of bouncing light off its surface; also involved in deep thought",synonyms:"Bright, shiny; Thoughtful",antonyms:null,set:"Set 1"},
+  {id:19,word:"tension",pos:"Noun",definition:"A feeling of fear or nervousness; also a state of being tight or stretched",synonyms:"Suspense, anxiety; Pressure, strain",antonyms:null,set:"Set 1"},
+  {id:20,word:"tremendous",pos:"Adjective",definition:"Very big in size or amount; also extremely impressive",synonyms:"Colossal, enormous; Astounding",antonyms:null,set:"Set 1"},
+  {id:21,word:"vibrate",pos:"Verb",definition:"To move back and forth quickly",synonyms:"Shake, quiver, tremble",antonyms:null,set:"Set 1"},
+  {id:22,word:"voyage",pos:"Noun/Verb",definition:"A long journey",synonyms:"Expedition, trip, adventure",antonyms:null,set:"Set 1"},
+  {id:23,word:"weary",pos:"Adjective",definition:"Extremely tired",synonyms:"Tired, exhausted, worn out",antonyms:"Energetic, refreshed, lively",set:"Set 1"},
+  {id:24,word:"accidentally",pos:"Adverb",definition:"By mistake or without intent",synonyms:"Unintentionally, mistakenly",antonyms:"Deliberately, intentionally",set:"Set 1"},
+  {id:25,word:"affect",pos:"Verb",definition:"To cause an effect or change",synonyms:"Influence, change, alter",antonyms:null,set:"Set 2"},
+  {id:26,word:"ancestor",pos:"Noun",definition:"A person from the past who you are related to",synonyms:"Forefather",antonyms:"Descendant",set:"Set 2"},
+  {id:27,word:"bland",pos:"Adjective",definition:"Boring or flavourless",synonyms:"Uninteresting, tasteless, dull",antonyms:"Exciting, tasty, distinctive",set:"Set 2"},
+  {id:28,word:"border",pos:"Noun/Verb",definition:"The boundary or edge of an object or area",synonyms:"Boundary, limit",antonyms:null,set:"Set 2"},
+  {id:29,word:"coast",pos:"Noun/Verb",definition:"The stretch of land that borders the sea; To move with ease",synonyms:"Shore, shoreline; Cruise, glide",antonyms:null,set:"Set 2"},
+  {id:30,word:"considerate",pos:"Adjective",definition:"Thinking about other people's needs or feelings",synonyms:"Sympathetic, charitable, thoughtful",antonyms:"Inconsiderate, careless, selfish",set:"Set 2"},
+  {id:31,word:"disobey",pos:"Verb",definition:"To refuse to obey a rule, person or law",synonyms:"Defy, ignore",antonyms:"Obey",set:"Set 2"},
+  {id:32,word:"disperse",pos:"Verb",definition:"To go or spread over a wide area",synonyms:"Scatter, spread out",antonyms:"Gather, collect",set:"Set 2"},
+  {id:33,word:"ecstatic",pos:"Adjective",definition:"Extremely delighted or excited",synonyms:"Elated, overjoyed, thrilled",antonyms:"Miserable, disappointed, sad",set:"Set 2"},
+  {id:34,word:"essential",pos:"Adj/Noun",definition:"Absolutely necessary",synonyms:"Vital, critical, crucial",antonyms:null,set:"Set 2"},
+  {id:35,word:"faulty",pos:"Adjective",definition:"Having a fault or defect",synonyms:"Defective, broken, flawed",antonyms:"Perfect",set:"Set 2"},
+  {id:36,word:"gloomily",pos:"Adverb",definition:"In a sad, hopeless way",synonyms:"Sadly, miserably, dismally",antonyms:"Happily, cheerfully, brightly",set:"Set 2"},
+  {id:37,word:"gradually",pos:"Adverb",definition:"Slowly, in small steps",synonyms:"Slowly, progressively, steadily",antonyms:"Suddenly",set:"Set 2"},
+  {id:38,word:"intention",pos:"Noun",definition:"What someone plans or means to do",synonyms:"Plan, aim, goal, purpose",antonyms:"Accident",set:"Set 2"},
+  {id:39,word:"interval",pos:"Noun",definition:"A gap or pause between events or things",synonyms:"Gap, pause, break, space",antonyms:null,set:"Set 2"},
+  {id:40,word:"limited",pos:"Adjective",definition:"Not very great in amount or extent",synonyms:"Capped, restricted",antonyms:"Unlimited, unrestricted",set:"Set 2"},
+  {id:41,word:"navigate",pos:"Verb",definition:"To find your way through an area or situation",synonyms:"Steer, guide, direct",antonyms:null,set:"Set 2"},
+  {id:42,word:"perhaps",pos:"Adverb",definition:"Possibly but not certainly",synonyms:"Maybe, possibly",antonyms:"Definitely",set:"Set 2"},
+  {id:43,word:"similar",pos:"Adjective",definition:"Sharing features or characteristics with something else",synonyms:"Alike, comparable, matching",antonyms:"Different",set:"Set 2"},
+  {id:44,word:"sly",pos:"Adjective",definition:"Crafty or cunning in a secretive way",synonyms:"Crafty, cunning, sneaky",antonyms:"Honest, open, straightforward",set:"Set 2"},
+  {id:45,word:"startle",pos:"Verb",definition:"To cause someone to be suddenly surprised or frightened",synonyms:"Surprise, shock, frighten",antonyms:null,set:"Set 2"},
+  {id:46,word:"vital",pos:"Adjective",definition:"Absolutely essential or important",synonyms:"Essential, critical, necessary",antonyms:"Unnecessary",set:"Set 2"},
+  {id:47,word:"actually",pos:"Adverb",definition:"In reality; used to emphasise something is true",synonyms:"In fact, really, in truth",antonyms:"Supposedly, allegedly",set:"Set 3"},
+  {id:48,word:"deserted",pos:"Adjective",definition:"Abandoned or empty of people",synonyms:"Abandoned, empty, uninhabited",antonyms:"Busy, populated",set:"Set 3"},
+  {id:49,word:"devour",pos:"Verb",definition:"To eat very quickly and greedily",synonyms:"Gobble, consume, wolf down",antonyms:"Nibble",set:"Set 3"},
+  {id:50,word:"dominate",pos:"Verb",definition:"To control or have power over",synonyms:"Control, rule, govern",antonyms:"Submit",set:"Set 3"},
+  {id:51,word:"fortunate",pos:"Adjective",definition:"Lucky",synonyms:"Lucky, blessed, favoured",antonyms:"Unfortunate",set:"Set 3"},
+  {id:52,word:"fragile",pos:"Adjective",definition:"Easily broken or damaged",synonyms:"Delicate, breakable, brittle",antonyms:"Sturdy, strong",set:"Set 3"},
+  {id:53,word:"grimy",pos:"Adjective",definition:"Covered in dirt",synonyms:"Dirty, filthy, mucky",antonyms:"Clean, spotless",set:"Set 3"},
+  {id:54,word:"hostile",pos:"Adjective",definition:"Unfriendly and opposing",synonyms:"Aggressive, unfriendly, opposed",antonyms:"Friendly, welcoming",set:"Set 3"},
+  {id:55,word:"illusion",pos:"Noun",definition:"Something that seems real but isn't",synonyms:"Vision, fantasy, deception",antonyms:"Reality",set:"Set 3"},
+  {id:56,word:"immortal",pos:"Adjective",definition:"Lasting forever",synonyms:"Everlasting, indestructible, eternal",antonyms:"Mortal",set:"Set 4"},
+  {id:57,word:"incredibly",pos:"Adverb",definition:"Extraordinarily, or hard to believe",synonyms:"Amazingly, astonishingly",antonyms:"Unexceptionally, believably",set:"Set 4"},
+  {id:58,word:"permanent",pos:"Adjective",definition:"Lasting forever",synonyms:"Fixed, everlasting",antonyms:"Temporary",set:"Set 4"},
+  {id:59,word:"predator",pos:"Noun",definition:"An animal that hunts and eats other animals",synonyms:"Carnivore",antonyms:"Prey",set:"Set 4"},
+  {id:60,word:"temporary",pos:"Adjective",definition:"For a short or limited amount of time",synonyms:"Short-term, impermanent",antonyms:"Permanent, long-lasting",set:"Set 4"},
+  {id:61,word:"request",pos:"Noun/Verb",definition:"The act of formally or politely asking for something",synonyms:"Appeal; Ask, order",antonyms:null,set:"Set 4"},
+  {id:62,word:"response",pos:"Noun",definition:"An answer, reply or reaction to something",synonyms:"Answer, reply, reaction",antonyms:null,set:"Set 4"},
+  {id:63,word:"revolting",pos:"Adj/Verb",definition:"Very unpleasant; fighting against a leader",synonyms:"Vile, disgusting, horrible; Rioting, rebelling",antonyms:null,set:"Set 4"},
+  {id:64,word:"rotate",pos:"Verb",definition:"To turn in a circle around a fixed point",synonyms:"Spin, turn",antonyms:null,set:"Set 4"},
+  {id:65,word:"scenery",pos:"Noun",definition:"The appearance of the natural surroundings",synonyms:"Landscape, views, surroundings",antonyms:null,set:"Set 4"},
+  {id:66,word:"toil",pos:"Verb/Noun",definition:"To work hard or for a long time on a tiring task",synonyms:"Labour, work, grind away",antonyms:null,set:"Set 4"},
+  {id:67,word:"unique",pos:"Adjective",definition:"Being the only one of something",synonyms:"Exclusive, special, uncommon, rare",antonyms:"Generic, ordinary, common",set:"Set 4"},
+  {id:68,word:"valiant",pos:"Adjective",definition:"Brave and courageous, especially when facing a difficult situation",synonyms:"Heroic, brave, courageous",antonyms:"Cowardly, weak",set:"Set 4"},
+  {id:69,word:"wince",pos:"Verb/Noun",definition:"To screw your face up in response to something unpleasant",synonyms:"Flinch, cringe; Grimace",antonyms:null,set:"Set 4"},
+  {id:70,word:"alter",pos:"Verb",definition:"To change something, usually in a small way",synonyms:"Change, adjust, modify",antonyms:"Leave alone, continue",set:"Set 4"},
+  {id:71,word:"archaeologist",pos:"Noun",definition:"A scientist who studies ancient human life by studying old objects",synonyms:"Scientist, prehistorian",antonyms:null,set:"Set 4"},
+  {id:72,word:"ascend",pos:"Verb",definition:"To move or climb upwards",synonyms:"Climb, rise",antonyms:"Descend, drop, fall",set:"Set 4"},
+  {id:73,word:"courteous",pos:"Adjective",definition:"Being polite, respectful and having good manners",synonyms:"Polite, respectful, considerate",antonyms:"Discourteous, rude, impolite",set:"Set 4"},
+  {id:74,word:"emit",pos:"Verb",definition:"To give out or release",synonyms:"Release, discharge, give off",antonyms:"Absorb, take up",set:"Set 4"},
+  {id:75,word:"evade",pos:"Verb",definition:"To escape or avoid something",synonyms:"Elude, dodge, sidestep",antonyms:"Confront, face",set:"Set 4"},
+  {id:76,word:"fare",pos:"Noun/Verb",definition:"An amount of money paid to travel somewhere; To do or go",synonyms:"Price, tariff, cost; Do, go",antonyms:null,set:"Set 4"},
+  {id:77,word:"fatigued",pos:"Adj/Verb",definition:"Being physically or mentally tired",synonyms:"Exhausted, wasted, burned out",antonyms:null,set:"Set 4"},
+  {id:78,word:"fortify",pos:"Verb",definition:"To protect or strengthen",synonyms:"Reinforce, toughen, bolster",antonyms:"Weaken",set:"Set 4"},
+  {id:79,word:"insulate",pos:"Verb",definition:"To cover or line something to stop heat, electricity or sound from passing through",synonyms:"Protect, encase",antonyms:null,set:"Set 4"},
+  {id:80,word:"intricate",pos:"Adjective",definition:"Having many small, complex or linked parts",synonyms:"Complex, complicated",antonyms:"Simple, basic",set:"Set 4"},
+  {id:81,word:"jagged",pos:"Adjective",definition:"Having uneven and sharp edges",synonyms:"Rough, pointed, serrated",antonyms:"Smooth, flat, level",set:"Set 4"},
+  {id:82,word:"ordeal",pos:"Noun",definition:"An unpleasant experience or test",synonyms:"Trial, test, nightmare",antonyms:"Treat",set:"Set 4"},
+  {id:83,word:"particularly",pos:"Adverb",definition:"More than normal, or more than others",synonyms:"Especially, specifically",antonyms:"Generally",set:"Set 4"},
+  {id:84,word:"prefer",pos:"Verb",definition:"To like something more than another or others",synonyms:"Favour, choose, go for",antonyms:"Reject, dislike",set:"Set 4"},
+  {id:85,word:"pristine",pos:"Adjective",definition:"In original condition or as good as new",synonyms:"Immaculate, pure, spotless, perfect",antonyms:"Dirty, spoiled, imperfect",set:"Set 4"},
+  {id:86,word:"reliable",pos:"Adjective",definition:"Can be trusted to work or behave in the way expected",synonyms:"Dependable, trusty, trustworthy",antonyms:"Unreliable, untrustworthy",set:"Set 4"},
+  {id:87,word:"scowl",pos:"Noun/Verb",definition:"An angry frown; To make an angry frown",synonyms:"Frown, grimace; Glower, glare",antonyms:null,set:"Set 4"},
+  {id:88,word:"shrill",pos:"Adjective",definition:"Having a high-pitched, piercing sound",synonyms:"Sharp, ear-splitting",antonyms:"Low, deep, soft",set:"Set 4"},
+  {id:89,word:"spacious",pos:"Adjective",definition:"Having a large amount of space",synonyms:"Vast, roomy",antonyms:"Cramped, crowded",set:"Set 4"},
+  {id:90,word:"spontaneous",pos:"Adjective",definition:"Happening in a sudden, unplanned way",synonyms:"Impulsive, instinctive, unplanned",antonyms:"Deliberate, planned, intended",set:"Set 4"},
+  {id:91,word:"tranquil",pos:"Adjective",definition:"Calm, quiet and peaceful",synonyms:"Relaxing, serene, restful",antonyms:"Busy, excitable, noisy",set:"Set 4"},
+  {id:92,word:"triumph",pos:"Noun/Verb",definition:"A great victory or achievement",synonyms:"Victory, win, conquest; Succeed, prevail",antonyms:null,set:"Set 4"},
+  {id:93,word:"trudge",pos:"Verb/Noun",definition:"To walk slowly and heavily with great effort",synonyms:"Plod, lumber; Traipse, slog",antonyms:null,set:"Set 4"}
+];
+
+// ===== STATE =====
+let selectedSets = new Set(['Set 1']);
+let activeMode = null;
+let activeWords = [];
+
+// FC State
+let fcIndex = 0;
+let fcFlipped = false;
+
+// Quiz State
+let quizWords = [];
+let quizIdx = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+// Match State
+let matchWords = [];
+let matchRoundIdx = 0;
+let matchSelected = null;
+let matchMatchedCount = 0;
+let matchTotalPairs = 0;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function getSelectedWords() {
+  return ALL_WORDS.filter(w => selectedSets.has(w.set));
+}
+
+function toggleSet(el) {
+  const set = el.dataset.set;
+  if (selectedSets.has(set)) {
+    if (selectedSets.size === 1) return; // keep at least one
+    selectedSets.delete(set);
+    el.classList.remove('selected');
+  } else {
+    selectedSets.add(set);
+    el.classList.add('selected');
+  }
+}
+
+function showScreen(id) {
+  document.querySelectorAll('#home-screen, .activity-screen, .score-screen').forEach(s => {
+    s.style.display = 'none';
+    s.classList.remove('active');
+  });
+  const el = document.getElementById(id);
+  if (el.classList.contains('activity-screen') || el.classList.contains('score-screen')) {
+    el.style.display = 'flex';
+    el.classList.add('active');
+  } else {
+    el.style.display = 'flex';
+  }
+}
+
+function goHome() {
+  document.getElementById('home-screen').style.display = 'flex';
+  document.querySelectorAll('.activity-screen, .score-screen').forEach(s => {
+    s.style.display = 'none';
+    s.classList.remove('active');
+  });
+}
+
+function startActivity(mode) {
+  activeWords = shuffle([...getSelectedWords()]);
+  if (activeWords.length < 4) {
+    alert('Please select at least one set with enough words!');
+    return;
+  }
+  activeMode = mode;
+  if (mode === 'flashcard') startFlashcard();
+  else if (mode === 'quiz') startQuiz();
+  else if (mode === 'match') startMatch();
+}
+
+// ===== FLASHCARD =====
+function startFlashcard() {
+  fcIndex = 0;
+  fcFlipped = false;
+  renderFC();
+  showScreen('flashcard-screen');
+}
+
+function renderFC() {
+  const w = activeWords[fcIndex];
+  document.getElementById('fc-inner').classList.remove('flipped');
+  fcFlipped = false;
+  document.getElementById('fc-word').textContent = w.word;
+  document.getElementById('fc-pos').textContent = w.pos;
+  document.getElementById('fc-set-badge').textContent = w.set;
+  document.getElementById('fc-set-badge-back').textContent = w.set;
+  document.getElementById('fc-def').textContent = w.definition;
+  document.getElementById('fc-syn').textContent = w.synonyms ? '💜 ' + w.synonyms : '';
+  document.getElementById('fc-ant').textContent = w.antonyms ? '❤️ Opp: ' + w.antonyms : '';
+  // Show phonetic
+  const phonetic = PHONETICS[w.word.toLowerCase()];
+  document.getElementById('fc-phonetic').textContent = phonetic ? '/' + phonetic + '/' : '';
+  // Reset speak btn
+  const btn = document.getElementById('fc-speak-btn');
+  btn.textContent = '🔊';
+  btn.classList.remove('speaking');
+  // Auto-speak after a short delay (so card animation plays first)
+  window.speechSynthesis.cancel();
+  setTimeout(() => {
+    const utter = new SpeechSynthesisUtterance(w.word);
+    utter.lang = 'en-GB';
+    utter.rate = 0.85;
+    utter.pitch = 1.0;
+    utter.onstart = () => { btn.textContent = '🔉'; btn.classList.add('speaking'); };
+    utter.onend = utter.onerror = () => { btn.textContent = '🔊'; btn.classList.remove('speaking'); };
+    window.speechSynthesis.speak(utter);
+  }, 350);
+  const pct = ((fcIndex + 1) / activeWords.length) * 100;
+  document.getElementById('fc-progress').style.width = pct + '%';
+  document.getElementById('fc-counter').textContent = (fcIndex + 1) + '/' + activeWords.length;
+  document.getElementById('fc-nav-counter').textContent = (fcIndex + 1) + ' / ' + activeWords.length;
+  document.getElementById('fc-prev').disabled = fcIndex === 0;
+  document.getElementById('fc-next').disabled = fcIndex === activeWords.length - 1;
+}
+
+function flipCard() {
+  const inner = document.getElementById('fc-inner');
+  fcFlipped = !fcFlipped;
+  inner.classList.toggle('flipped', fcFlipped);
+}
+
+function fcNav(dir) {
+  const newIdx = fcIndex + dir;
+  if (newIdx < 0 || newIdx >= activeWords.length) return;
+  fcIndex = newIdx;
+  renderFC();
+}
+
+// ===== QUIZ =====
+function startQuiz() {
+  quizWords = shuffle([...activeWords]).slice(0, Math.min(10, activeWords.length));
+  quizIdx = 0;
+  quizScore = 0;
+  renderQuiz();
+  showScreen('quiz-screen');
+}
+
+function renderQuiz() {
+  if (quizIdx >= quizWords.length) {
+    showScore('quiz');
+    return;
+  }
+  quizAnswered = false;
+  const w = quizWords[quizIdx];
+  document.getElementById('quiz-word').textContent = w.word;
+  document.getElementById('quiz-pos').textContent = w.pos;
+  document.getElementById('quiz-feedback').style.display = 'none';
+  document.getElementById('quiz-next').style.display = 'none';
+
+  // Build 4 options: 1 correct + 3 wrong
+  const others = ALL_WORDS.filter(x => x.id !== w.id);
+  const wrong = shuffle(others).slice(0, 3);
+  const opts = shuffle([w, ...wrong]);
+
+  const container = document.getElementById('quiz-options');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.definition.length > 80 ? opt.definition.slice(0, 78) + '…' : opt.definition;
+    btn.onclick = () => answerQuiz(opt.id === w.id, btn);
+    container.appendChild(btn);
+  });
+
+  const pct = (quizIdx / quizWords.length) * 100;
+  document.getElementById('quiz-progress').style.width = pct + '%';
+  document.getElementById('quiz-counter').textContent = (quizIdx + 1) + '/' + quizWords.length;
+}
+
+function answerQuiz(correct, btn) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const allBtns = document.querySelectorAll('#quiz-options .option-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  if (correct) {
+    btn.classList.add('correct');
+    quizScore++;
+    showFeedback('✅ Correct! Great job! 🌟', true);
+  } else {
+    btn.classList.add('wrong');
+    // highlight correct
+    const w = quizWords[quizIdx];
+    allBtns.forEach(b => {
+      if (b.textContent === w.definition || w.definition.startsWith(b.textContent.replace('…', ''))) {
+        b.classList.add('correct');
+      }
+    });
+    showFeedback('❌ Not quite... The correct meaning has been highlighted.', false);
+  }
+  document.getElementById('quiz-next').style.display = 'block';
+}
+
+function showFeedback(msg, correct) {
+  const fb = document.getElementById('quiz-feedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (correct ? 'correct' : 'wrong');
+  fb.textContent = msg;
+}
+
+function nextQuiz() {
+  quizIdx++;
+  renderQuiz();
+}
+
+// ===== MATCH =====
+const MATCH_BATCH = 6;
+function startMatch() {
+  matchWords = shuffle([...activeWords]);
+  matchRoundIdx = 0;
+  matchMatchedCount = 0;
+  matchTotalPairs = matchWords.length;
+  renderMatchRound();
+  showScreen('match-screen');
+}
+
+function renderMatchRound() {
+  const start = matchRoundIdx * MATCH_BATCH;
+  const batch = matchWords.slice(start, start + MATCH_BATCH);
+  if (batch.length === 0) {
+    showScore('match');
+    return;
+  }
+  matchSelected = null;
+  document.getElementById('match-next').style.display = 'none';
+
+  const wordsShuffled = shuffle([...batch]);
+  const defsShuffled = shuffle([...batch]);
+
+  const wordCol = document.getElementById('match-words');
+  const defCol = document.getElementById('match-defs');
+  wordCol.innerHTML = '';
+  defCol.innerHTML = '';
+
+  wordsShuffled.forEach(w => {
+    const tile = document.createElement('div');
+    tile.className = 'match-tile word';
+    tile.textContent = w.word;
+    tile.dataset.id = w.id;
+    tile.dataset.type = 'word';
+    tile.onclick = () => matchSelect(tile);
+    wordCol.appendChild(tile);
+  });
+
+  defsShuffled.forEach(w => {
+    const tile = document.createElement('div');
+    tile.className = 'match-tile def';
+    tile.textContent = w.definition.length > 60 ? w.definition.slice(0, 58) + '…' : w.definition;
+    tile.dataset.id = w.id;
+    tile.dataset.type = 'def';
+    tile.onclick = () => matchSelect(tile);
+    defCol.appendChild(tile);
+  });
+
+  const total = Math.ceil(matchWords.length / MATCH_BATCH);
+  const cur = matchRoundIdx + 1;
+  document.getElementById('match-counter').textContent = `Round ${cur}/${total}`;
+  const pct = (matchRoundIdx / total) * 100;
+  document.getElementById('match-progress').style.width = pct + '%';
+}
+
+let matchRoundMatched = 0;
+
+function matchSelect(tile) {
+  if (tile.classList.contains('matched')) return;
+
+  if (!matchSelected) {
+    tile.classList.add('selected');
+    matchSelected = tile;
+    return;
+  }
+
+  if (tile === matchSelected) {
+    tile.classList.remove('selected');
+    matchSelected = null;
+    return;
+  }
+
+  // Check match
+  if (matchSelected.dataset.id === tile.dataset.id && matchSelected.dataset.type !== tile.dataset.type) {
+    // Match!
+    matchSelected.classList.remove('selected');
+    matchSelected.classList.add('matched');
+    tile.classList.add('matched');
+    matchSelected = null;
+    matchMatchedCount++;
+
+    // Check if round done
+    const batch = matchWords.slice(matchRoundIdx * MATCH_BATCH, (matchRoundIdx + 1) * MATCH_BATCH);
+    const allTiles = document.querySelectorAll('.match-tile');
+    const matchedInRound = [...allTiles].filter(t => t.classList.contains('matched')).length;
+    if (matchedInRound === batch.length * 2) {
+      const hasMore = (matchRoundIdx + 1) * MATCH_BATCH < matchWords.length;
+      const nextBtn = document.getElementById('match-next');
+      nextBtn.textContent = hasMore ? 'Next Round →' : '🎉 See Results!';
+      nextBtn.style.display = 'block';
+    }
+  } else {
+    // Wrong
+    tile.classList.add('wrong-shake');
+    matchSelected.classList.add('wrong-shake');
+    const prev = matchSelected;
+    setTimeout(() => {
+      tile.classList.remove('wrong-shake', 'selected');
+      prev.classList.remove('wrong-shake', 'selected');
+    }, 450);
+    matchSelected = null;
+  }
+}
+
+function nextMatchRound() {
+  matchRoundIdx++;
+  renderMatchRound();
+  const hasMore = matchRoundIdx * MATCH_BATCH < matchWords.length;
+  if (!hasMore) showScore('match');
+}
+
+// ===== SCORE =====
+function showScore(mode) {
+  const screen = document.getElementById('score-screen');
+  let emoji, title, numText, sub;
+
+  if (mode === 'quiz') {
+    const pct = quizScore / quizWords.length;
+    numText = quizScore + '/' + quizWords.length;
+    if (pct === 1) { emoji = '🏆'; title = 'PERFECT!'; sub = 'You got every single one! Amazing! 🌟'; }
+    else if (pct >= .8) { emoji = '🎉'; title = 'Excellent!'; sub = "You're crushing it! Keep going! 💪"; }
+    else if (pct >= .6) { emoji = '👍'; title = 'Good job!'; sub = 'Solid effort! A bit more practice and you\'ll ace it!'; }
+    else { emoji = '📚'; title = 'Keep trying!'; sub = 'Learning takes practice — you\'ve got this!'; }
+  } else if (mode === 'match') {
+    emoji = '🎯';
+    title = 'All Matched!';
+    numText = matchMatchedCount + ' pairs';
+    sub = 'You matched all the words! Great work! 🌈';
+  }
+
+  document.getElementById('score-emoji').textContent = emoji;
+  document.getElementById('score-title').textContent = title;
+  document.getElementById('score-num').textContent = numText;
+  document.getElementById('score-sub').textContent = sub;
+
+  document.getElementById('score-retry').onclick = () => startActivity(mode);
+
+  showScreen('score-screen');
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const wrap = document.getElementById('confetti');
+  wrap.innerHTML = '';
+  const colors = ['#a855f7','#f59e0b','#14b8a6','#3b82f6','#ec4899','#f97316','#84cc16'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.cssText = `
+      left: ${Math.random() * 100}%;
+      top: -20px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      width: ${8 + Math.random() * 8}px;
+      height: ${8 + Math.random() * 8}px;
+      animation-duration: ${1.5 + Math.random() * 2}s;
+      animation-delay: ${Math.random() * 1}s;
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+    `;
+    wrap.appendChild(piece);
+  }
+}
+
+// Initialize — select Set 1 by default
+document.querySelector('.set-card[data-set="Set 1"]').classList.add('selected');
+</script>
+</body>
+</html>
