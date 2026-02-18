@@ -680,32 +680,26 @@ const PHONETICS = {
 };
 
 // ===== SPEECH =====
-let currentUtterance = null;
-function speakWord(e) {
-  e.stopPropagation(); // don't flip the card
-  const word = document.getElementById('fc-word').textContent;
+function sayWord(word, onStart, onEnd) {
   if (!word || !window.speechSynthesis) return;
-
-  // Stop any ongoing speech
   window.speechSynthesis.cancel();
-  const btn = document.getElementById('fc-speak-btn');
-
   const utter = new SpeechSynthesisUtterance(word);
   utter.lang = 'en-GB';
   utter.rate = 0.85;
   utter.pitch = 1.0;
-
-  utter.onstart = () => {
-    btn.textContent = '🔉';
-    btn.classList.add('speaking');
-  };
-  utter.onend = utter.onerror = () => {
-    btn.textContent = '🔊';
-    btn.classList.remove('speaking');
-  };
-
+  if (onStart) utter.onstart = onStart;
+  if (onEnd) { utter.onend = onEnd; utter.onerror = onEnd; }
   window.speechSynthesis.speak(utter);
-  currentUtterance = utter;
+}
+
+function speakWord(e) {
+  e.stopPropagation();
+  const word = document.getElementById('fc-word').textContent;
+  const btn = document.getElementById('fc-speak-btn');
+  sayWord(word,
+    () => { btn.textContent = '🔉'; btn.classList.add('speaking'); },
+    () => { btn.textContent = '🔊'; btn.classList.remove('speaking'); }
+  );
 }
 
 
@@ -912,15 +906,11 @@ function renderFC() {
   btn.textContent = '🔊';
   btn.classList.remove('speaking');
   // Auto-speak after a short delay (so card animation plays first)
-  window.speechSynthesis.cancel();
   setTimeout(() => {
-    const utter = new SpeechSynthesisUtterance(w.word);
-    utter.lang = 'en-GB';
-    utter.rate = 0.85;
-    utter.pitch = 1.0;
-    utter.onstart = () => { btn.textContent = '🔉'; btn.classList.add('speaking'); };
-    utter.onend = utter.onerror = () => { btn.textContent = '🔊'; btn.classList.remove('speaking'); };
-    window.speechSynthesis.speak(utter);
+    sayWord(w.word,
+      () => { btn.textContent = '🔉'; btn.classList.add('speaking'); },
+      () => { btn.textContent = '🔊'; btn.classList.remove('speaking'); }
+    );
   }, 350);
   const pct = ((fcIndex + 1) / activeWords.length) * 100;
   document.getElementById('fc-progress').style.width = pct + '%';
@@ -963,6 +953,8 @@ function renderQuiz() {
   document.getElementById('quiz-pos').textContent = w.pos;
   document.getElementById('quiz-feedback').style.display = 'none';
   document.getElementById('quiz-next').style.display = 'none';
+  // Auto-speak the word
+  setTimeout(() => sayWord(w.word), 300);
 
   // Build 4 options: 1 correct + 3 wrong
   const others = ALL_WORDS.filter(x => x.id !== w.id);
@@ -1080,6 +1072,11 @@ let matchRoundMatched = 0;
 
 function matchSelect(tile) {
   if (tile.classList.contains('matched')) return;
+
+  // Speak the word if a word tile is tapped
+  if (tile.dataset.type === 'word') {
+    sayWord(tile.textContent);
+  }
 
   if (!matchSelected) {
     tile.classList.add('selected');
