@@ -498,6 +498,57 @@
   }
   @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
   .pop { animation: pop .3s ease; }
+
+  /* Voice selector */
+  .voice-section {
+    width: 100%;
+    max-width: 700px;
+    margin-top: 24px;
+    background: white;
+    border-radius: 20px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.07);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .voice-label {
+    font-size: .85rem;
+    font-weight: 800;
+    color: var(--muted);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .voice-select {
+    flex: 1;
+    min-width: 180px;
+    border: 2.5px solid #d8b4fe;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--text);
+    background: #faf5ff;
+    cursor: pointer;
+    outline: none;
+  }
+  .voice-test-btn {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .88rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .voice-test-btn:active { transform: scale(.95); }
 </style>
 </head>
 <body>
@@ -550,9 +601,16 @@
       </button>
     </div>
   </div>
-</div>
 
-<!-- FLASHCARD SCREEN -->
+  <!-- Voice Selector -->
+  <div class="voice-section">
+    <span class="voice-label">🔊 Voice</span>
+    <select class="voice-select" id="voice-select" onchange="setVoice(this.value)">
+      <option value="">Loading voices...</option>
+    </select>
+    <button class="voice-test-btn" onclick="testVoice()">Test ▶</button>
+  </div>
+</div>
 <div id="flashcard-screen" class="activity-screen">
   <div class="activity-header">
     <button class="back-btn" onclick="goHome()">←</button>
@@ -679,12 +737,56 @@ const PHONETICS = {
   "tranquil": "TRAN-kwil", "triumph": "TRY-umf", "trudge": "TRUJ"
 };
 
+// ===== VOICE SELECTION =====
+let selectedVoice = null;
+
+function loadVoices() {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return;
+  const sel = document.getElementById('voice-select');
+  sel.innerHTML = '';
+  // Show all voices, highlight English ones
+  voices.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    const flag = v.lang.startsWith('en') ? '🇬🇧 ' : '';
+    opt.textContent = flag + v.name + ' (' + v.lang + ')';
+    if (v.lang.startsWith('en')) opt.style.fontWeight = '700';
+    sel.appendChild(opt);
+  });
+  // Default: pick a nice English voice
+  const preferred = voices.findIndex(v =>
+    v.name.includes('Daniel') || v.name.includes('Samantha') ||
+    v.name.includes('Karen') || v.name.includes('Moira') ||
+    (v.lang === 'en-GB') || (v.lang === 'en-US')
+  );
+  sel.selectedIndex = preferred >= 0 ? preferred : 0;
+  selectedVoice = voices[sel.selectedIndex];
+}
+
+function setVoice(idx) {
+  selectedVoice = window.speechSynthesis.getVoices()[idx];
+}
+
+function testVoice() {
+  sayWord('Word Quest — learning is fun!');
+}
+
+// Load voices when ready (Chrome fires onvoiceschanged, Safari loads immediately)
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+  // Safari fallback
+  setTimeout(loadVoices, 500);
+}
+
 // ===== SPEECH =====
 function sayWord(word, onStart, onEnd) {
   if (!word || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(word);
-  utter.lang = 'en-GB';
+  if (selectedVoice) utter.voice = selectedVoice;
+  utter.lang = selectedVoice ? selectedVoice.lang : 'en-GB';
   utter.rate = 0.85;
   utter.pitch = 1.0;
   if (onStart) utter.onstart = onStart;
